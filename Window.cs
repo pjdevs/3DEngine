@@ -17,7 +17,7 @@ namespace gl
             : base(gameWindowSettings, nativeWindowSettings)
         {
             _shader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
-            _camera = new Camera(3f * Vector3.UnitZ, Size.Y / (float)Size.X);
+            _camera = new Camera(3f * Vector3.UnitZ, Size.X / (float)Size.Y);
             _texture = Texture.LoadFromFile("Resources/container.png");
 
             _plane = new Model(MeshBuilder.BuildCube(1));
@@ -66,7 +66,7 @@ namespace gl
         {
             base.OnResize(e);
 
-            _camera.AspectRatio = e.Size.Y / (float)e.Size.X;
+            _camera.AspectRatio = e.Size.X / (float)e.Size.Y;
 
             Renderer.Viewport(0, 0, Size.X, Size.Y);
         }
