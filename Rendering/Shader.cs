@@ -4,7 +4,7 @@ using OpenTK.Mathematics;
 namespace gl.Rendering
 {
     // A simple class meant to help create shaders.
-    public class Shader
+    public class Shader : IDisposable
     {
         public readonly int Handle;
 
@@ -191,6 +191,12 @@ namespace gl.Rendering
         {
             GL.UseProgram(Handle);
             GL.Uniform3(_uniformLocations[name], data.R, data.G, data.B);
+        }
+
+        public void Dispose()
+        {
+            GL.DeleteProgram(Handle);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -9,10 +9,10 @@ namespace gl.Rendering
 
             return new Mesh(new float[]
             {
-                 halfWidth,  halfHeight, 0.0f, 1.0f, 1.0f, // top right
-                 halfWidth, -halfHeight, 0.0f, 1.0f, 0.0f, // bottom right
-                -halfWidth, -halfHeight, 0.0f, 0.0f, 0.0f, // bottom left
-                -halfWidth,  halfHeight, 0.0f, 0.0f, 1.0f, // top left
+                 halfWidth, 0.0f,  halfHeight, 1.0f, 1.0f, // top right
+                 halfWidth, 0.0f, -halfHeight, 1.0f, 0.0f, // bottom right
+                -halfWidth, 0.0f, -halfHeight, 0.0f, 0.0f, // bottom left
+                -halfWidth, 0.0f,  halfHeight, 0.0f, 1.0f, // top left
             }, new uint[]
             {
                 0, 1, 3, // The first triangle will be the bottom-right half of the triangle

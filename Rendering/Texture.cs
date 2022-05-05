@@ -5,7 +5,7 @@ using StbImageSharp;
 namespace gl.Rendering
 {
     // A helper class, much like Shader, meant to simplify loading textures.
-    public class Texture
+    public class Texture : IDisposable
     {
         public readonly int Handle;
 
@@ -75,6 +75,8 @@ namespace gl.Rendering
             // Here is an example of mips in action https://en.wikipedia.org/wiki/File:Mipmap_Aliasing_Comparison.png
             GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
             return new Texture(handle);
         }
 
@@ -91,6 +93,12 @@ namespace gl.Rendering
         {
             GL.ActiveTexture(unit);
             GL.BindTexture(TextureTarget.Texture2D, Handle);
+        }
+
+        public void Dispose()
+        {
+            GL.DeleteTexture(Handle);
+            GC.SuppressFinalize(this);
         }
     }
 }

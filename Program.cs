@@ -15,7 +15,7 @@ namespace gl
                 Flags = ContextFlags.ForwardCompatible, // needed for MacOS
             };
 
-            using var window = new Window(GameWindowSettings.Default, nativeWindowSettings);
+            using var window = new GLWindow(GameWindowSettings.Default, nativeWindowSettings);
 
             window.Run();
         }
