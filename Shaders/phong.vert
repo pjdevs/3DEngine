@@ -12,7 +12,7 @@ out vec2 texCoords;
 out vec3 normal;
 out vec3 worldPosition;
 
-void main(void)
+void main()
 {
     texCoords = vertexTexCoords;
     normal = vertexNormal * mat3(transpose(inverse(model)));

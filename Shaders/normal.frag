@@ -29,27 +29,22 @@ struct Light
     float quadratic;
 };
 
-struct Camera
-{
-    vec3 position;
-};
-
 uniform Material material;
-uniform Camera camera;
 uniform int nbPointLights;
 uniform Light pointLights[MAX_POINT_LIGHTS];
 
 in vec2 texCoords;
-in vec3 normal;
+in vec3 viewPosition;
 in vec3 worldPosition;
+in vec3 lightPositions[MAX_POINT_LIGHTS];
 in mat3 TBN;
 
 out vec4 fragColor;
 
-vec3 ComputePointLight(Light light, vec3 norm, vec3 viewDirection, vec3 materialAmbient, vec3 materialDiffuse, vec3 materialSpecular)
+vec3 ComputePointLight(Light light, vec3 lightPosition, vec3 norm, vec3 viewDirection, vec3 materialAmbient, vec3 materialDiffuse, vec3 materialSpecular)
 {
     // Directions
-    vec3 lightDirection = normalize(light.position - worldPosition);
+    vec3 lightDirection = normalize(lightPosition - worldPosition);
 
     // Ambient
     vec3 ambientLight = materialAmbient * light.ambient;
@@ -64,24 +59,29 @@ vec3 ComputePointLight(Light light, vec3 norm, vec3 viewDirection, vec3 material
     vec3 specularLight = materialSpecular * specularStrength * light.specular; 
 
     // Attenuation
-    float d = length(light.position - worldPosition);
+    float d = length(lightPosition - worldPosition);
     float attenuation = 1.0 / (light.constant + light.linear * d + light.quadratic * (d * d));
 
     return (ambientLight + diffuseLight + specularLight) * attenuation;
 }
 
-void main(void)
+void main()
 {
     // Final material props
-    vec3 materialAmbient = material.ambient * texture(material.texture, texCoords).rgb;
-    vec3 materialDiffuse = material.diffuse * texture(material.texture, texCoords).rgb;
-    vec3 materialSpecular = material.specular * texture(material.texture, texCoords).rgb;
+    vec3 materialAmbient = material.ambient;
+    vec3 materialDiffuse = material.diffuse;;
+    vec3 materialSpecular = material.specular;
 
+    if (material.hasTexture)
+    {
+        materialAmbient *= texture(material.texture, texCoords).rgb;
+        materialDiffuse *= texture(material.texture, texCoords).rgb;
+        materialSpecular *= texture(material.texture, texCoords).rgb;
+    }
     // Directions
     vec3 norm = texture(material.normal, texCoords).rgb;
-    norm = norm * 2.0 - 1.0;
-    norm = normalize(TBN * norm);
-    vec3 viewDirection = normalize(camera.position - worldPosition);
+    norm = normalize(norm * 2.0 - 1.0);
+    vec3 viewDirection = normalize(viewPosition - worldPosition);
 
     // Lights
     vec3 color = vec3(0.0);
@@ -89,7 +89,7 @@ void main(void)
     if (material.light)
     {
         for (int i = 0; i < nbPointLights; ++i)
-            color += ComputePointLight(pointLights[i], norm, viewDirection, materialAmbient, materialDiffuse, materialSpecular);
+            color += ComputePointLight(pointLights[i], lightPositions[i], norm, viewDirection, materialAmbient, materialDiffuse, materialSpecular);
     }
     else
         color = materialDiffuse;

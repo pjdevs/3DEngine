@@ -11,16 +11,28 @@ namespace gl
 {
     public class GLWindow : GameWindow
     {
-        private readonly Shader _shader;
+        private readonly Shader[] _shaders;
+        private int _currentShader;
         private readonly AbstractCamera _camera;
         private readonly Model _sphere;
+        private readonly Model _light;
         private readonly Light[] _lights;
         // private double _t;
 
         public GLWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            _shader = new Shader("Shaders/normal.vert", "Shaders/normal.frag");
+            var uniforms = new string[]
+            {
+                "material.light"
+            };
+
+            _shaders = new Shader[]
+            {
+                new Shader("Shaders/phong.vert", "Shaders/phong.frag"),
+                new Shader("Shaders/normal.vert", "Shaders/normal.frag")
+            };
+            _currentShader = 0;
             _camera = new SphericalCamera(new Vector3(0f, 2f, 4f), Size.X / (float)Size.Y)
             {
                 Pitch = -45f
@@ -35,16 +47,26 @@ namespace gl
             _sphere.Material.Texture = Texture.LoadFromFile("Resources/brickwall/brickwall.jpg");
             _sphere.Material.Normal = Texture.LoadFromFile("Resources/brickwall/brickwall_normal.jpg");
             _sphere.Material.Light = true;
-            _sphere.Material.Shininess = 32;
+            _sphere.Material.Shininess = 4;
 
             _lights = new Light[]
             {
                 new Light()
                 {
-                    Position = _camera.Position,
-                    Diffuse = Color4.LightYellow
+                    Position = new Vector3(0f, 3f, 1f),
+                    Diffuse = Color4.LightYellow,
+                    Constant = 0f,
+                    Linear = 0f,
+                    Quadratic = 0.1f,
                 }
             };
+
+            _light = new Model(MeshBuilder.BuildCube(0.1f));
+            _light.Transform.Translation = _lights[0].Position;
+            _light.Material.Ambient = Color4.White;
+            _light.Material.Diffuse = Color4.White;
+            _light.Material.Specular = Color4.White;
+            _light.Material.Light = false;
 
             // _t = 0;
         }
@@ -62,7 +84,8 @@ namespace gl
             base.OnRenderFrame(e);
 
             Renderer.Clear();
-            Renderer.Render(_shader, _camera, _lights, _sphere);
+            Renderer.Render(_shaders[_currentShader], _camera, _lights, _sphere);
+            Renderer.Render(_shaders[0], _camera, _lights, _light);
 
             SwapBuffers();
         }
@@ -81,9 +104,25 @@ namespace gl
                 Close();
             }
 
-            if (KeyboardState.IsKeyReleased(Keys.R))
+            if (KeyboardState.IsKeyReleased(Keys.P))
             {
                 _sphere.Transform.Rotation.X += MathHelper.PiOver2;
+            }
+
+            if (KeyboardState.IsKeyReleased(Keys.M))
+            {
+                ++_currentShader;
+
+                if (_currentShader >= _shaders.Length)
+                    _currentShader = 0;
+            }
+
+            if (KeyboardState.IsKeyReleased(Keys.R))
+            {
+                for (var i = 0; i < _shaders.Length; ++i)
+                {
+                    _shaders[i] = _shaders[i].Reload();
+                }
             }
 
             // _sphere.Transform.Rotation.Y += (float)e.Time * 1.5f * MathHelper.PiOver2;

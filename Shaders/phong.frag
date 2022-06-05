@@ -44,7 +44,7 @@ in vec3 worldPosition;
 
 out vec4 fragColor;
 
-vec3 ComputePointLight(Light light, vec3 materialAmbient,vec3 materialDiffuse, vec3 materialSpecular)
+vec3 ComputePointLight(Light light, vec3 materialAmbient, vec3 materialDiffuse, vec3 materialSpecular)
 {
     // Directions
     vec3 norm = normalize(normal);
@@ -70,17 +70,18 @@ vec3 ComputePointLight(Light light, vec3 materialAmbient,vec3 materialDiffuse, v
     return (ambientLight + diffuseLight + specularLight) * attenuation;
 }
 
-void main(void)
+void main()
 {
-
     // Final material props
     vec3 materialAmbient = material.ambient;
-    vec3 materialDiffuse = material.diffuse;
+    vec3 materialDiffuse = material.diffuse;;
     vec3 materialSpecular = material.specular;
 
     if (material.hasTexture)
     {
-        materialDiffuse *= texture(material.texture, texCoords).rgb; 
+        materialAmbient *= texture(material.texture, texCoords).rgb;
+        materialDiffuse *= texture(material.texture, texCoords).rgb;
+        materialSpecular *= texture(material.texture, texCoords).rgb;
     }
 
     // Directions

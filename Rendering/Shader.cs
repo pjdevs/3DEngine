@@ -9,6 +9,8 @@ namespace gl.Rendering
         public readonly int Handle;
 
         private readonly Dictionary<string, int> _uniformLocations;
+        private readonly string _vertPath;
+        private readonly string _fragPath;
 
         // This is how you create a simple shader.
         // Shaders are written in GLSL, which is a language very similar to C in its semantics.
@@ -21,6 +23,8 @@ namespace gl.Rendering
             //   The vertex shader won't be too important here, but they'll be more important later.
             // The fragment shader is responsible for then converting the vertices to "fragments", which represent all the data OpenGL needs to draw a pixel.
             //   The fragment shader is what we'll be using the most here.
+            _vertPath = vertPath;
+            _fragPath = fragPath;
 
             // Load vertex shader and compile
             var shaderSource = File.ReadAllText(vertPath);
@@ -82,6 +86,16 @@ namespace gl.Rendering
             }
         }
 
+        public Shader(string vertPath, string fragPath, string[] uniforms)
+            : this(vertPath, fragPath)
+        {
+            foreach (var uniform in uniforms)
+            {
+                var location = GL.GetUniformLocation(Handle, uniform);
+                _uniformLocations.Add(uniform, location);
+            }
+        }
+
         private static void CompileShader(int shader)
         {
             // Try to compile the shader
@@ -107,7 +121,7 @@ namespace gl.Rendering
             if (code != (int)All.True)
             {
                 // We can use `GL.GetProgramInfoLog(program)` to get information about the error.
-                throw new Exception($"Error occurred whilst linking Program({program})");
+                throw new Exception($"Error occurred whilst linking Program({program}) : {GL.GetProgramInfoLog(program)}");
             }
         }
 
@@ -191,6 +205,12 @@ namespace gl.Rendering
         {
             GL.UseProgram(Handle);
             GL.Uniform3(_uniformLocations[name], data.R, data.G, data.B);
+        }
+
+        public Shader Reload()
+        {
+            Dispose();
+            return new Shader(_vertPath, _fragPath);
         }
 
         public void Dispose()

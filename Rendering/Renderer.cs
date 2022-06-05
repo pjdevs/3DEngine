@@ -56,10 +56,23 @@ namespace gl.Rendering
                 model.Material.Texture.Use(TextureUnit.Texture0);
                 shader.SetInt("material.hasTexture", 1);
             }
+            else
+            {
+                shader.SetInt("material.hasTexture", 0);
+            }
 
             if (model.Material.Normal != null)
             {
                 model.Material.Normal.Use(TextureUnit.Texture1);
+            }
+
+            shader.SetInt("material.texture", 0);
+            try
+            {
+                shader.SetInt("material.normal", 1);
+            }
+            catch (Exception _)
+            {
             }
 
             model.Mesh.Draw();
