@@ -9,15 +9,15 @@ namespace gl.Rendering
 
             return new Mesh(new float[]
             {
-                 halfWidth, 0.0f,  halfHeight, 1.0f, 1.0f, // top right
-                 halfWidth, 0.0f, -halfHeight, 1.0f, 0.0f, // bottom right
-                -halfWidth, 0.0f, -halfHeight, 0.0f, 0.0f, // bottom left
-                -halfWidth, 0.0f,  halfHeight, 0.0f, 1.0f, // top left
+                 halfWidth, 0.0f,  halfHeight, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // top right
+                 halfWidth, 0.0f, -halfHeight, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
+                -halfWidth, 0.0f, -halfHeight, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+                -halfWidth, 0.0f,  halfHeight, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, // top left
             }, new uint[]
             {
                 0, 1, 3, // The first triangle will be the bottom-right half of the triangle
                 1, 2, 3  // Then the second will be the top-right half of the triangle
-            });
+            }, MeshFlags.All);
         }
 
         public static Mesh BuildCube(float size)

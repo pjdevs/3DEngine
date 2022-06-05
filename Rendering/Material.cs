@@ -4,20 +4,24 @@ namespace gl.Rendering
 {
     public struct Material
     {
-        public Color4 Color;
+        public Color4 BaseColor;
         public Texture? Texture;
+        public Texture? Normal;
         public bool Light;
-        public float Ambient;
-        public float Specular;
+        public Color4 Ambient;
+        public Color4 Diffuse;
+        public Color4 Specular;
         public int Shininess;
 
         public Material()
         {
-            Color = Color4.White;
+            BaseColor = Color4.White;
             Texture = null;
+            Normal = null;
             Light = false;
-            Ambient = 0.1f;
-            Specular = 0.5f;
+            Ambient = BaseColor;
+            Diffuse = BaseColor;
+            Specular = Color4.Gray;
             Shininess = 32;
         }
     }

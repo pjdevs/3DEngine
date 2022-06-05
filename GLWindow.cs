@@ -4,43 +4,49 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Mathematics;
 
 using gl.Rendering;
-using gl.Utils;
+using gl.Rendering.Camera;
+using gl.Rendering.Utils;
 
 namespace gl
 {
     public class GLWindow : GameWindow
     {
         private readonly Shader _shader;
-        private readonly Camera _camera;
-        private readonly Texture _texture;
-        private readonly Model _cube;
-        private readonly Light _light;
-        private double _t;
+        private readonly AbstractCamera _camera;
+        private readonly Model _sphere;
+        private readonly Light[] _lights;
+        // private double _t;
 
         public GLWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            _shader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
-            _camera = new Camera(new Vector3(0f, 2f, 4f), Size.X / (float)Size.Y)
+            _shader = new Shader("Shaders/normal.vert", "Shaders/normal.frag");
+            _camera = new SphericalCamera(new Vector3(0f, 2f, 4f), Size.X / (float)Size.Y)
             {
                 Pitch = -45f
             };
-            _texture = Texture.LoadFromFile("Resources/container.png");
 
-            var data = MeshImporter.FromOBJ("Resources/sphere.obj");
+            var mesh = MeshBuilder.BuildPlane(5f, 5f); // MeshImporter.FromOBJ("Resources/cube.obj");
 
-            _cube = new Model(new Mesh(data.Vertices, data.Indexes, MeshFlags.All));
-            _cube.Material.Color = Color4.Red;
-            // _cube.Material.Texture = _texture;
-            _cube.Material.Light = true;
-            _cube.Material.Shininess = 32;
+            _sphere = new Model(mesh);
+            _sphere.Material.Ambient = Color4.Gray;
+            _sphere.Material.Diffuse = Color4.White;
+            _sphere.Material.Specular = Color4.White;
+            _sphere.Material.Texture = Texture.LoadFromFile("Resources/brickwall/brickwall.jpg");
+            _sphere.Material.Normal = Texture.LoadFromFile("Resources/brickwall/brickwall_normal.jpg");
+            _sphere.Material.Light = true;
+            _sphere.Material.Shininess = 32;
 
-            _light = new Light()
+            _lights = new Light[]
             {
-                Color = Color4.LightYellow
+                new Light()
+                {
+                    Position = _camera.Position,
+                    Diffuse = Color4.LightYellow
+                }
             };
 
-            _t = 0;
+            // _t = 0;
         }
 
         protected override void OnLoad()
@@ -56,7 +62,7 @@ namespace gl
             base.OnRenderFrame(e);
 
             Renderer.Clear();
-            Renderer.Render(_shader, _camera, _light, _cube);
+            Renderer.Render(_shader, _camera, _lights, _sphere);
 
             SwapBuffers();
         }
@@ -70,22 +76,26 @@ namespace gl
                 return;
             }
 
-            var input = KeyboardState;
-
-            if (input.IsKeyDown(Keys.Escape))
+            if (KeyboardState.IsKeyDown(Keys.Escape))
             {
                 Close();
             }
 
-            // _cube.Transform.Rotation.X += (float)e.Time * MathHelper.PiOver2;
-            // _cube.Transform.Rotation.Y += (float)e.Time * 1.5f * MathHelper.PiOver2;
+            if (KeyboardState.IsKeyReleased(Keys.R))
+            {
+                _sphere.Transform.Rotation.X += MathHelper.PiOver2;
+            }
+
+            // _sphere.Transform.Rotation.Y += (float)e.Time * 1.5f * MathHelper.PiOver2;
 
             // var s = (float)MathHelper.Sin(_t);
             // var t = (float)MathHelper.Sin(3f * _t);
             // _cube.Material.Color.R = s * s;
             // _cube.Material.Color.B = 1f - t * t;
 
-            _t += e.Time;
+            // _t += e.Time;
+
+            _camera.Update(KeyboardState, MouseState, (float)e.Time);
         }
 
         protected override void OnResize(ResizeEventArgs e)

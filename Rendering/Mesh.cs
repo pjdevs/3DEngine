@@ -7,7 +7,8 @@ namespace gl.Rendering
         Vertices = 1,
         UVs = 2,
         Normals = 4,
-        All = Vertices | UVs | Normals
+        Tangents = 8,
+        All = Vertices | UVs | Normals | Tangents
     }
 
     public class Mesh : IDisposable
@@ -25,13 +26,14 @@ namespace gl.Rendering
             var includeVertices = (flags & MeshFlags.Vertices) == MeshFlags.Vertices;
             var includeUVs = (flags & MeshFlags.UVs) == MeshFlags.UVs;
             var includeNormals = (flags & MeshFlags.Normals) == MeshFlags.Normals;
+            var includeTangents = (flags & MeshFlags.Tangents) == MeshFlags.Tangents;
 
             if (!includeVertices)
                 throw new Exception("Mesh vertices must at least contains vertex coordinates");
 
             var currentIndex = 0;
             var currentOffset = 0;
-            var stride = (3 + Convert.ToInt32(includeUVs) * 2 + Convert.ToInt32(includeNormals) * 3) * sizeof(float);
+            var stride = (3 + Convert.ToInt32(includeUVs) * 2 + Convert.ToInt32(includeNormals) * 3 + Convert.ToInt32(includeTangents) * 3) * sizeof(float);
 
             _vertices = vertices;
             _indices = indices;
@@ -42,25 +44,31 @@ namespace gl.Rendering
 
             Smooth = false;
 
+            GL.BindVertexArray(_vertexArrayObject);
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, _vertexBufferObject);
             GL.BufferData(BufferTarget.ArrayBuffer, _vertices.Length * sizeof(float), _vertices, BufferUsageHint.StaticDraw);
 
-            GL.BindVertexArray(_vertexArrayObject);
-
-            GL.VertexAttribPointer(currentIndex, 3, VertexAttribPointerType.Float, false, stride, 0);
             GL.EnableVertexAttribArray(currentIndex);
+            GL.VertexAttribPointer(currentIndex, 3, VertexAttribPointerType.Float, false, stride, 0);
             currentOffset += 3;
             currentIndex++;
 
             if (includeUVs)
             {
-                GL.VertexAttribPointer(currentIndex, 2, VertexAttribPointerType.Float, false, stride, currentOffset * sizeof(float));
                 GL.EnableVertexAttribArray(currentIndex);
+                GL.VertexAttribPointer(currentIndex, 2, VertexAttribPointerType.Float, false, stride, currentOffset * sizeof(float));
                 currentOffset += 2;
                 currentIndex++;
             }
-
             if (includeNormals)
+            {
+                GL.EnableVertexAttribArray(currentIndex);
+                GL.VertexAttribPointer(currentIndex, 3, VertexAttribPointerType.Float, false, stride, currentOffset * sizeof(float));
+                currentOffset += 3;
+                currentIndex++;
+            }
+            if (includeTangents)
             {
                 GL.VertexAttribPointer(currentIndex, 3, VertexAttribPointerType.Float, false, stride, currentOffset * sizeof(float));
                 GL.EnableVertexAttribArray(currentIndex);
