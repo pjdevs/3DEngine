@@ -7,6 +7,44 @@ namespace gl.Rendering
 {
     public static class Renderer
     {
+        private static readonly Dictionary<string, RenderingTechnique> s_techniques = new()
+        {
+            { "PBR", new PBRTechnique() },
+            { "Normal Map", new NormalTechnique() },
+            { "Phong", new PhongTechnique() }
+        };
+
+        private static int s_technique = 0;
+
+        private static RenderingTechnique? GetBestTechnique(Model model)
+        {
+            RenderingTechnique? bestTechnique = null;
+
+            foreach (var technique in s_techniques.Values)
+            {
+                if (technique.CanRender(model))
+                {
+                    bestTechnique = technique;
+                    break;
+                }
+            }
+
+            return bestTechnique;
+        }
+
+        public static IEnumerable<string> GetTechniques()
+        {
+            return s_techniques.Keys.AsEnumerable();
+        }
+
+        public static void SwitchTechnique()
+        {
+            s_technique++;
+
+            if (s_technique >= s_techniques.Values.Count)
+                s_technique = 0;
+        }
+
         public static void ClearColor(Color4 color)
         {
             GL.ClearColor(color);
@@ -22,60 +60,22 @@ namespace gl.Rendering
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
-        public static void Render(Shader shader, AbstractCamera camera, Light[] lights, Model model)
+        public static void ReloadShaders()
         {
-            shader.Use();
-
-            shader.SetMatrix4("projection", camera.GetProjectionMatrix());
-            shader.SetMatrix4("view", camera.GetViewMatrix());
-            shader.SetMatrix4("model", model.Transform.GetModelMatrix());
-
-            shader.SetColor4("material.baseColor", model.Material.BaseColor);
-            shader.SetInt("material.light", Convert.ToInt32(model.Material.Light));
-            shader.SetColor4("material.ambient", model.Material.Ambient);
-            shader.SetColor4("material.diffuse", model.Material.Diffuse);
-            shader.SetColor4("material.specular", model.Material.Specular);
-            shader.SetInt("material.shininess", model.Material.Shininess);
-
-            for (var i = 0; i < lights.Length; ++i)
+            foreach (var technique in s_techniques.Values)
             {
-                shader.SetVector3($"pointLights[{i}].position", lights[i].Position);
-                shader.SetColor4($"pointLights[{i}].ambient", lights[i].Ambient);
-                shader.SetColor4($"pointLights[{i}].diffuse", lights[i].Diffuse);
-                shader.SetColor4($"pointLights[{i}].specular", lights[i].Specular);
-                shader.SetFloat($"pointLights[{i}].constant", lights[i].Constant);
-                shader.SetFloat($"pointLights[{i}].linear", lights[i].Linear);
-                shader.SetFloat($"pointLights[{i}].quadratic", lights[i].Quadratic);
+                technique.ReloadShader();
             }
-            shader.SetInt("nbPointLights", lights.Length);
+        }
 
-            shader.SetVector3("camera.position", camera.Position);
+        public static void Render(AbstractCamera camera, DirectionalLight dirLight, PointLight[] lights, Model model)
+        {
+            var technique = s_techniques.Values.ElementAt(s_technique);
 
-            if (model.Material.Texture != null)
-            {
-                model.Material.Texture.Use(TextureUnit.Texture0);
-                shader.SetInt("material.hasTexture", 1);
-            }
-            else
-            {
-                shader.SetInt("material.hasTexture", 0);
-            }
+            if (!technique.CanRender(model))
+                technique = GetBestTechnique(model);
 
-            if (model.Material.Normal != null)
-            {
-                model.Material.Normal.Use(TextureUnit.Texture1);
-            }
-
-            shader.SetInt("material.texture", 0);
-            try
-            {
-                shader.SetInt("material.normal", 1);
-            }
-            catch (Exception _)
-            {
-            }
-
-            model.Mesh.Draw();
+            technique?.Render(camera, dirLight, lights, model);
         }
 
         public static void Viewport(int x, int y, int width, int height)
