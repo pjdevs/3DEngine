@@ -25,6 +25,7 @@ namespace gl.Rendering
             Shader.SetMatrix4("projection", camera.GetProjectionMatrix());
             Shader.SetMatrix4("view", camera.GetViewMatrix());
             Shader.SetMatrix4("model", model.Transform.GetModelMatrix());
+            Shader.SetVector3("viewPos", camera.Position);
 
             model.Material.Texture?.Use(TextureUnit.Texture0);
             model.Material.Normal?.Use(TextureUnit.Texture1);
@@ -41,7 +42,6 @@ namespace gl.Rendering
             Shader.SetColor4("dirLight.diffuse", dirLight.Diffuse);
             Shader.SetColor4("dirLight.specular", dirLight.Specular);
 
-
             for (var i = 0; i < lights.Length; ++i)
             {
                 Shader.SetVector3($"pointLights[{i}].position", lights[i].Position);
@@ -52,9 +52,7 @@ namespace gl.Rendering
                 Shader.SetFloat($"pointLights[{i}].linear", lights[i].Linear);
                 Shader.SetFloat($"pointLights[{i}].quadratic", lights[i].Quadratic);
             }
-            Shader.SetInt("nbPointLights", lights.Length);
-
-            Shader.SetVector3("viewPos", camera.Position);
+            Shader.SetInt("nbPointLightInScene", lights.Length);
 
             model.Mesh.Draw();
         }

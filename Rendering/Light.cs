@@ -17,12 +17,12 @@ namespace gl.Rendering
         {
             Position = Vector3.One * 5f;
             Ambient = new Color4(0.2f, 0.2f, 0.2f, 1f);
-            Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1f);
+            Diffuse = Color4.LightYellow;
             Specular = Color4.White;
 
-            Constant = 1f;
+            Constant = 0f;
             Linear = 0f;
-            Quadratic = 0f;
+            Quadratic = 0.1f;
         }
     }
 
@@ -35,9 +35,9 @@ namespace gl.Rendering
 
         public DirectionalLight()
         {
-            Direction = -Vector3.One * 5f;
+            Direction = -Vector3.One;
             Ambient = new Color4(0.2f, 0.2f, 0.2f, 1f);
-            Diffuse = new Color4(0.5f, 0.5f, 0.5f, 1f);
+            Diffuse = Color4.LightYellow;
             Specular = Color4.White;
         }
     }

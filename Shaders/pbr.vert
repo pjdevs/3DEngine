@@ -28,7 +28,7 @@ layout(location = 1) in vec2 aTexCoords;
 layout(location = 2) in vec3 aNormal;
 layout(location = 3) in vec3 aTangent;
 
-uniform int nbPointLights;
+uniform int nbPointLightInScene;
 uniform PointLight pointLights[MAX_NUMBER_POINT_LIGHT];
 uniform DirLight dirLight;
 uniform mat4 model;
@@ -57,7 +57,7 @@ void main()
 
     mat3 TBN = mat3(T, B, N);
     
-    for (int i = 0; i < nbPointLights; ++i)
+    for (int i = 0; i < nbPointLightInScene; ++i)
         vs_out.LightPositions[i] = pointLights[i].position * TBN;
 
     vs_out.DirLightDirection = dirLight.direction * TBN;

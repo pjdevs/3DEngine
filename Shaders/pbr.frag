@@ -56,7 +56,6 @@ in VS_OUT {
 } fs_in;
 
 uniform Material material;
-
 uniform DirLight dirLight;
 uniform int nbPointLightInScene;
 uniform PointLight pointLights[MAX_NUMBER_POINT_LIGHT];
@@ -174,14 +173,14 @@ void main()
     // Compute point lights
     for (int i = 0; i < nbPointLightInScene; ++i)
     {
-        info.direction = normalize(pointLights[i].position - fs_in.FragPos);
+        info.direction = normalize(fs_in.LightPositions[i] - fs_in.FragPos);
         info.attenuation = ComputeAttenuation(pointLights[i], fs_in.LightPositions[i]);
         info.color = pointLights[i].diffuse;
 
         color += ComputeLightContribution(info, viewDir, normal);
     }
 
-    vec3 ambient = vec3(0.1) * info.albedo * info.ao;
+    vec3 ambient = vec3(0.03) * info.albedo * info.ao;
     color += ambient;
 
     // Gamma correction / HDR
