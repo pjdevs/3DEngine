@@ -83,6 +83,56 @@ namespace gl.Rendering
             });
         }
 
+        public static Vector3[] ComputeTangents(IEnumerable<Vector3> vertices, IEnumerable<Vector2> UVs, IEnumerable<uint> indices)
+        {
+            Vector3[] tangents = new Vector3[vertices.Count()];
+
+            Vector3? lastTangent = null;
+
+            for (int i = 0; i < indices.Count(); i += 3)
+            {
+                int i0 = (int)indices.ElementAt(i);
+                int i1 = (int)indices.ElementAt(i + 1);
+                int i2 = (int)indices.ElementAt(i + 2);
+
+                Vector3 pos2 = vertices.ElementAt(i0);
+                Vector3 pos1 = vertices.ElementAt(i1);
+                Vector3 pos3 = vertices.ElementAt(i2);
+
+                Vector2 uv1 = UVs.ElementAt(i0);
+                Vector2 uv2 = UVs.ElementAt(i1);
+                Vector2 uv3 = UVs.ElementAt(i2);
+
+                Vector3 edge1 = pos2 - pos1;
+                Vector3 edge2 = pos3 - pos1;
+                Vector2 deltaUV1 = uv2 - uv1;
+                Vector2 deltaUV2 = uv3 - uv1;
+
+                float f = 1.0f / ((deltaUV1.X * deltaUV2.Y) - (deltaUV2.X * deltaUV1.Y));
+                if (float.IsInfinity(f))
+                    f = 1;
+
+                Vector3 tangent = new Vector3();
+                tangent.X = (float)System.Math.Round(f * ((deltaUV2.Y * edge1.X) - (deltaUV1.Y * edge2.X)), 3);
+                tangent.Y = (float)System.Math.Round(f * ((deltaUV2.Y * edge1.Y) - (deltaUV1.Y * edge2.Y)), 3);
+                tangent.Z = (float)System.Math.Round(f * ((deltaUV2.Y * edge1.Z) - (deltaUV1.Y * edge2.Z)), 3);
+
+                // Si on a Tangent = (0,0,0) la normalization donnera Nan dans ce cas on lui donne la valeur de la dernière tangent calculé (ou un valeur aléatoire)
+                if (tangent.X == 0 && tangent.Y == 0 && tangent.Z == 0)
+                {
+                    tangent = lastTangent.HasValue ? lastTangent.Value : Vector3.UnitX;
+                }
+
+                tangents[i0] = tangent;
+                tangents[i1] = tangent;
+                tangents[i2] = tangent;
+
+                lastTangent = tangent;
+            }
+
+            return tangents;
+        }
+
         public static Mesh BuildSphere(float radius, int sectorCount, int stackCount = -1)
         {
             stackCount = stackCount == -1 ? sectorCount : stackCount;
@@ -162,6 +212,7 @@ namespace gl.Rendering
                 }
             }
 
+            var tangents = ComputeTangents(vertices, texCoords, indices);
             var vertexBuffer = new List<float>();
 
             for (var i = 0; i < vertices.Count; ++i)
@@ -176,9 +227,13 @@ namespace gl.Rendering
                 vertexBuffer.Add(normals[i].X);
                 vertexBuffer.Add(normals[i].Y);
                 vertexBuffer.Add(normals[i].Z);
+
+                vertexBuffer.Add(tangents[i].X);
+                vertexBuffer.Add(tangents[i].Y);
+                vertexBuffer.Add(tangents[i].Z);
             }
 
-            return new Mesh(vertexBuffer.ToArray(), indices.ToArray(), MeshFlags.Vertices | MeshFlags.UVs | MeshFlags.Normals);
+            return new Mesh(vertexBuffer.ToArray(), indices.ToArray(), MeshFlags.All);
         }
     }
 }
