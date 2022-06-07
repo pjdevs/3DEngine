@@ -11,9 +11,10 @@ namespace gl
 {
     public class GLWindow : GameWindow
     {
-        private readonly AbstractCamera _camera;
+        private readonly ICamera _camera;
         private readonly Model _model;
         private readonly Model _lightModel;
+        private readonly Model _groundModel;
         private readonly DirectionalLight _dirLight;
         private readonly PointLight[] _lights;
         private readonly Material[] _materials;
@@ -24,12 +25,7 @@ namespace gl
         public GLWindow(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings)
             : base(gameWindowSettings, nativeWindowSettings)
         {
-            _camera = new SphericalCamera(new Vector3(0f, 2f, 4f), Size.X / (float)Size.Y)
-            {
-                Pitch = -45f
-            };
-
-
+            _camera = new SphericalCamera(Size.X / (float)Size.Y);
             _materials = new Material[]
             {
                 new Material()
@@ -42,7 +38,10 @@ namespace gl
                     Texture = Texture.LoadFromFile("Resources/caverdeposit/cavern-deposits_albedo.png"),
                     Normal = Texture.LoadFromFile("Resources/caverdeposit/cavern-deposits_normal.png"),
                     Metallic = Texture.LoadFromFile("Resources/caverdeposit/cavern-deposits_metallic.png"),
-                    Roughness = Texture.LoadFromFile("Resources/caverdeposit/cavern-deposits_roughness.png")
+                    Roughness = Texture.LoadFromFile("Resources/caverdeposit/cavern-deposits_roughness.png"),
+                    Height = Texture.LoadFromFile("Resources/caverdeposit/cavern-deposits_height.png"),
+                    ParallaxHeight = false,
+                    HeightScale = 0.5f
                 },
                 new Material()
                 {
@@ -81,7 +80,12 @@ namespace gl
                 }
             };
 
-            _model = new Model(MeshBuilder.BuildSphere(1f, 100))
+            _model = new Model(MeshBuilder.BuildSphere(1f, 200))
+            {
+                Material = _materials[_currentMaterial]
+            };
+            _model.Transform.Translation.Y = 1.5f;
+            _groundModel = new Model(MeshBuilder.BuildPlane(10f, 10f))
             {
                 Material = _materials[_currentMaterial]
             };
@@ -111,6 +115,7 @@ namespace gl
             Renderer.Clear();
             Renderer.Render(_camera, _dirLight, _lights, _model);
             Renderer.Render(_camera, _dirLight, _lights, _lightModel);
+            Renderer.Render(_camera, _dirLight, _lights, _groundModel);
 
             SwapBuffers();
         }
@@ -147,6 +152,7 @@ namespace gl
                     _currentMaterial = 0;
 
                 _model.Material = _materials[_currentMaterial];
+                _groundModel.Material = _materials[_currentMaterial];
             }
 
             // _t += e.Time;

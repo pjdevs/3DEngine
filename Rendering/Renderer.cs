@@ -9,6 +9,7 @@ namespace gl.Rendering
     {
         private static readonly Dictionary<string, RenderingTechnique> s_techniques = new()
         {
+            { "PBR Height Map", new PBRHeightTechnique() },
             { "PBR", new PBRTechnique() },
             { "Normal Map", new NormalTechnique() },
             { "Phong", new PhongTechnique() }
@@ -70,7 +71,7 @@ namespace gl.Rendering
             }
         }
 
-        public static void Render(AbstractCamera camera, DirectionalLight dirLight, PointLight[] lights, Model model)
+        public static void Render(ICamera camera, DirectionalLight dirLight, PointLight[] lights, Model model)
         {
             var technique = s_techniques.Values.ElementAt(s_technique);
 

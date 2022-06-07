@@ -2,7 +2,7 @@ using OpenTK.Mathematics;
 
 namespace gl.Rendering
 {
-    public struct Material
+    public class Material
     {
         public Color4 BaseColor;
         public bool Light;
@@ -15,6 +15,10 @@ namespace gl.Rendering
         public Texture? Normal;
         public Texture? Metallic;
         public Texture? Roughness;
+        public Texture? Height;
+
+        public float HeightScale;
+        public bool ParallaxHeight;
 
         public Material()
         {
@@ -28,6 +32,9 @@ namespace gl.Rendering
             Normal = null;
             Metallic = null;
             Roughness = null;
+            Height = null;
+            HeightScale = 1f;
+            ParallaxHeight = false;
         }
     }
 }

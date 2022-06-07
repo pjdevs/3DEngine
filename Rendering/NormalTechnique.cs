@@ -15,7 +15,7 @@ namespace gl.Rendering
             return model.Material.Normal != null;
         }
 
-        public override void Render(AbstractCamera camera, DirectionalLight dirLight, PointLight[] lights, Model model)
+        public override void Render(ICamera camera, DirectionalLight dirLight, PointLight[] lights, Model model)
         {
             Shader.Use();
 

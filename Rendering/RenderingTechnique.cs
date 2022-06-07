@@ -12,7 +12,7 @@ namespace gl.Rendering
         }
 
         public abstract bool CanRender(Model model);
-        public abstract void Render(AbstractCamera camera, DirectionalLight dirLight, PointLight[] lights, Model model);
+        public abstract void Render(ICamera camera, DirectionalLight dirLight, PointLight[] lights, Model model);
         public void ReloadShader()
         {
             Shader = Shader.Reload();

@@ -11,7 +11,7 @@ namespace gl.Rendering.Camera
 
     // TL;DR: This is just one of many ways in which we could have set up the camera.
     // Check out the web version if you don't know why we are doing a specific thing or want to know more about the code.
-    public abstract class AbstractCamera
+    public class StaticCamera : ICamera
     {
         // Those vectors are directions pointing outwards from the camera to define how it rotated.
         private Vector3 _front = -Vector3.UnitZ;
@@ -29,17 +29,21 @@ namespace gl.Rendering.Camera
         // The field of view of the camera (radians)
         private float _fov = MathHelper.PiOver2;
 
-        public AbstractCamera(Vector3 position, float aspectRatio)
+        public StaticCamera(Vector3 position, float aspectRatio)
         {
             Position = position;
             AspectRatio = aspectRatio;
+            Near = 0.01f;
+            Far = 100f;
         }
+        public float Near { get; set; }
+        public float Far { get; set; }
 
         // The position of the camera
         public Vector3 Position { get; set; }
 
         // This is simply the aspect ratio of the viewport, used for the projection matrix.
-        public float AspectRatio { private get; set; }
+        public float AspectRatio { get; set; }
 
         public Vector3 Front => _front;
 
@@ -96,7 +100,7 @@ namespace gl.Rendering.Camera
         // Get the projection matrix using the same method we have used up until this point
         public Matrix4 GetProjectionMatrix()
         {
-            return Matrix4.CreatePerspectiveFieldOfView(_fov, AspectRatio, 0.01f, 100f);
+            return Matrix4.CreatePerspectiveFieldOfView(Fov, AspectRatio, Near, Far);
         }
 
         // This function is going to update the direction vertices using some of the math learned in the web tutorials.
@@ -117,6 +121,8 @@ namespace gl.Rendering.Camera
             _up = Vector3.Normalize(Vector3.Cross(_right, _front));
         }
 
-        public abstract void Update(KeyboardState keyboard, MouseState mouse, float dt);
+        public virtual void Update(KeyboardState keyboard, MouseState mouse, float dt)
+        {
+        }
     }
 }

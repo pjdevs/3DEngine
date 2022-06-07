@@ -12,7 +12,7 @@ namespace gl
         private Vector2i _size;
         private readonly Node _root;
 
-        public AbstractCamera CurrentCamera { get; set; }
+        public StaticCamera CurrentCamera { get; set; }
         public Shader CurrentShader { get; set; }
 
         protected void Draw(Model model)
@@ -28,7 +28,7 @@ namespace gl
             _root.Scene = this;
             _defaultShader = new Shader("Shaders/texture.vert", "Shaders/texture.frag");
 
-            CurrentCamera = new SphericalCamera(Vector3.Zero, _size.X / (float)_size.Y);
+            CurrentCamera = new FreeCamera(Vector3.Zero, _size.X / (float)_size.Y);
             CurrentShader = _defaultShader;
         }
 
