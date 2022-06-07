@@ -91,7 +91,7 @@ namespace gl.Rendering
             List<Vector3> normals = new List<Vector3>();
             List<Vector2> texCoords = new List<Vector2>();
 
-            float x, y, z, xy;                              // vertex position
+            float x, y, z, xz;                              // vertex position
             float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
             float s, t;                                     // vertex texCoord
 
@@ -102,8 +102,8 @@ namespace gl.Rendering
             for (int i = 0; i <= stackCount; ++i)
             {
                 stackAngle = (float)Math.PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
-                xy = radius * (float)Math.Cos(stackAngle);             // r * cos(u)
-                z = radius * (float)Math.Sin(stackAngle);              // r * sin(u)
+                xz = radius * (float)Math.Cos(stackAngle);             // r * cos(u)
+                y = radius * (float)Math.Sin(stackAngle);              // r * sin(u)
 
                 // add (sectorCount+1) vertices per stack
                 // the first and last vertices have same position and normal, but different tex coords
@@ -112,8 +112,8 @@ namespace gl.Rendering
                     sectorAngle = j * sectorStep;           // starting from 0 to 2pi
 
                     // vertex position (x, y, z)
-                    x = xy * (float)Math.Cos(sectorAngle);             // r * cos(u) * cos(v)
-                    y = xy * (float)Math.Sin(sectorAngle);             // r * cos(u) * sin(v)
+                    x = xz * (float)Math.Cos(sectorAngle);             // r * cos(u) * cos(v)
+                    z = xz * (float)Math.Sin(sectorAngle);             // r * cos(u) * sin(v)
                     vertices.Add(new Vector3(x, y, z));
 
                     // normalized vertex normal (nx, ny, nz)
@@ -162,11 +162,23 @@ namespace gl.Rendering
                 }
             }
 
-            var vertexBuffer = new float[(vertices.Length + normals.Length) * 3 + texCoords.Length * 2];
+            var vertexBuffer = new List<float>();
 
-            // TODO: for loop to fill vertexBuffer
+            for (var i = 0; i < vertices.Count; ++i)
+            {
+                vertexBuffer.Add(vertices[i].X);
+                vertexBuffer.Add(vertices[i].Y);
+                vertexBuffer.Add(vertices[i].Z);
 
-            Mesh = new Mesh(vertexBuffer, indices);
+                vertexBuffer.Add(texCoords[i].X);
+                vertexBuffer.Add(texCoords[i].Y);
+
+                vertexBuffer.Add(normals[i].X);
+                vertexBuffer.Add(normals[i].Y);
+                vertexBuffer.Add(normals[i].Z);
+            }
+
+            return new Mesh(vertexBuffer.ToArray(), indices.ToArray(), MeshFlags.Vertices | MeshFlags.UVs | MeshFlags.Normals);
         }
     }
 }

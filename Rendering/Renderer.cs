@@ -43,6 +43,8 @@ namespace gl.Rendering
 
             if (s_technique >= s_techniques.Values.Count)
                 s_technique = 0;
+
+            Console.WriteLine($"Technique is {s_techniques.Keys.ElementAt(s_technique)}");
         }
 
         public static void ClearColor(Color4 color)

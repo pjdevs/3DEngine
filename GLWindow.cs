@@ -81,7 +81,7 @@ namespace gl
                 }
             };
 
-            _model = new Model(MeshBuilder.BuildPlane(5f, 5f))
+            _model = new Model(MeshBuilder.BuildSphere(1f, 100))
             {
                 Material = _materials[_currentMaterial]
             };
