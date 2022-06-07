@@ -1,4 +1,5 @@
 using OpenTK.Mathematics;
+using gl.Rendering.Utils;
 
 namespace gl.Rendering
 {
@@ -83,73 +84,23 @@ namespace gl.Rendering
             });
         }
 
-        public static Vector3[] ComputeTangents(IEnumerable<Vector3> vertices, IEnumerable<Vector2> UVs, IEnumerable<uint> indices)
-        {
-            Vector3[] tangents = new Vector3[vertices.Count()];
-
-            Vector3? lastTangent = null;
-
-            for (int i = 0; i < indices.Count(); i += 3)
-            {
-                int i0 = (int)indices.ElementAt(i);
-                int i1 = (int)indices.ElementAt(i + 1);
-                int i2 = (int)indices.ElementAt(i + 2);
-
-                Vector3 pos2 = vertices.ElementAt(i0);
-                Vector3 pos1 = vertices.ElementAt(i1);
-                Vector3 pos3 = vertices.ElementAt(i2);
-
-                Vector2 uv1 = UVs.ElementAt(i0);
-                Vector2 uv2 = UVs.ElementAt(i1);
-                Vector2 uv3 = UVs.ElementAt(i2);
-
-                Vector3 edge1 = pos2 - pos1;
-                Vector3 edge2 = pos3 - pos1;
-                Vector2 deltaUV1 = uv2 - uv1;
-                Vector2 deltaUV2 = uv3 - uv1;
-
-                float f = 1.0f / ((deltaUV1.X * deltaUV2.Y) - (deltaUV2.X * deltaUV1.Y));
-                if (float.IsInfinity(f))
-                    f = 1;
-
-                Vector3 tangent = new Vector3();
-                tangent.X = (float)System.Math.Round(f * ((deltaUV2.Y * edge1.X) - (deltaUV1.Y * edge2.X)), 3);
-                tangent.Y = (float)System.Math.Round(f * ((deltaUV2.Y * edge1.Y) - (deltaUV1.Y * edge2.Y)), 3);
-                tangent.Z = (float)System.Math.Round(f * ((deltaUV2.Y * edge1.Z) - (deltaUV1.Y * edge2.Z)), 3);
-
-                // Si on a Tangent = (0,0,0) la normalization donnera Nan dans ce cas on lui donne la valeur de la dernière tangent calculé (ou un valeur aléatoire)
-                if (tangent.X == 0 && tangent.Y == 0 && tangent.Z == 0)
-                {
-                    tangent = lastTangent.HasValue ? lastTangent.Value : Vector3.UnitX;
-                }
-
-                tangents[i0] = tangent;
-                tangents[i1] = tangent;
-                tangents[i2] = tangent;
-
-                lastTangent = tangent;
-            }
-
-            return tangents;
-        }
-
         public static Mesh BuildSphere(float radius, int sectorCount, int stackCount = -1)
         {
             stackCount = stackCount == -1 ? sectorCount : stackCount;
 
-            List<Vector3> vertices = new List<Vector3>();
-            List<Vector3> normals = new List<Vector3>();
-            List<Vector2> texCoords = new List<Vector2>();
+            var vertices = new List<Vector3>();
+            var normals = new List<Vector3>();
+            var texCoords = new List<Vector2>();
 
             float x, y, z, xz;                              // vertex position
             float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
             float s, t;                                     // vertex texCoord
 
-            float sectorStep = (float)(2 * Math.PI / sectorCount);
-            float stackStep = (float)(Math.PI / stackCount);
+            var sectorStep = (float)(2 * Math.PI / sectorCount);
+            var stackStep = (float)(Math.PI / stackCount);
             float sectorAngle, stackAngle;
 
-            for (int i = 0; i <= stackCount; ++i)
+            for (var i = 0; i <= stackCount; ++i)
             {
                 stackAngle = (float)Math.PI / 2 - i * stackStep;        // starting from pi/2 to -pi/2
                 xz = radius * (float)Math.Cos(stackAngle);             // r * cos(u)
@@ -157,7 +108,7 @@ namespace gl.Rendering
 
                 // add (sectorCount+1) vertices per stack
                 // the first and last vertices have same position and normal, but different tex coords
-                for (int j = 0; j <= sectorCount; ++j)
+                for (var j = 0; j <= sectorCount; ++j)
                 {
                     sectorAngle = j * sectorStep;           // starting from 0 to 2pi
 
@@ -184,14 +135,14 @@ namespace gl.Rendering
             // |  / |
             // | /  |
             // k2--k2+1
-            List<uint> indices = new List<uint>();
+            var indices = new List<uint>();
             int k1, k2;
-            for (int i = 0; i < stackCount; ++i)
+            for (var i = 0; i < stackCount; ++i)
             {
                 k1 = i * (sectorCount + 1);     // beginning of current stack
                 k2 = k1 + sectorCount + 1;      // beginning of next stack
 
-                for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
+                for (var j = 0; j < sectorCount; ++j, ++k1, ++k2)
                 {
                     // 2 triangles per sector excluding first and last stacks
                     // k1 => k2 => k1+1
@@ -212,7 +163,7 @@ namespace gl.Rendering
                 }
             }
 
-            var tangents = ComputeTangents(vertices, texCoords, indices);
+            var tangents = MeshUtils.ComputeTangents(vertices, texCoords, indices);
             var vertexBuffer = new List<float>();
 
             for (var i = 0; i < vertices.Count; ++i)
