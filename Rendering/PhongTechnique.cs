@@ -23,7 +23,7 @@ namespace gl.Rendering
             Shader.SetMatrix4("view", camera.GetViewMatrix());
             Shader.SetMatrix4("model", model.Transform.GetModelMatrix());
 
-            Shader.SetColor4("material.baseColor", model.Material.BaseColor);
+            // Shader.SetColor4("material.baseColor", model.Material.BaseColor);
             Shader.SetInt("material.light", Convert.ToInt32(model.Material.Light));
             Shader.SetColor4("material.ambient", model.Material.Ambient);
             Shader.SetColor4("material.diffuse", model.Material.Diffuse);

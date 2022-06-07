@@ -38,9 +38,9 @@ namespace gl.Rendering
             Shader.SetInt("material.roughnessMap", 3);
 
             Shader.SetVector3("dirLight.direction", dirLight.Direction);
-            Shader.SetColor4("dirLight.ambient", dirLight.Ambient);
+            // Shader.SetColor4("dirLight.ambient", dirLight.Ambient);
             Shader.SetColor4("dirLight.diffuse", dirLight.Diffuse);
-            Shader.SetColor4("dirLight.specular", dirLight.Specular);
+            // Shader.SetColor4("dirLight.specular", dirLight.Specular);
 
             for (var i = 0; i < lights.Length; ++i)
             {
